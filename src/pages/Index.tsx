@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Introduction from '@/components/Introduction';
 import Auth from './Auth';
@@ -13,7 +12,6 @@ import Subscription from '@/components/Subscription';
 import Navigation from '@/components/Navigation';
 import UserSettings from '@/components/UserSettings';
 import LoadingAnimation from '@/components/LoadingAnimation';
-import TrackPagePopup from '@/components/TrackPagePopup';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -445,7 +443,7 @@ const Index = () => {
                 <p className="text-gray-600 text-sm">Log symptoms and daily observations</p>
               </div>
             </div>
-            <EnhancedSymptomTracker onSave={handleTrackSave} />
+            <EnhancedSymptomTracker />
           </div>
         );
       
