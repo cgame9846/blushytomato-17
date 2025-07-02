@@ -1,0 +1,18 @@
+
+name: Daily Notification Check
+
+on:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  check-notifications:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Notifications
+        run: |
+          curl -X GET "${{ secrets.API_URL }}/notifications/check" \
+            -H "Content-Type: application/json" \
+            --fail-with-body
