@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/supabaseClient';
-import { useToast } from '@/hooks/use-toast';
 
 interface AuthProps {
   onAuthSuccess: () => void;
@@ -16,85 +14,19 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
-  const handleEmailAuth = async (isSignUp: boolean) => {
-    if (!email || !password || (isSignUp && password !== confirmPassword)) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all fields correctly",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
-    
-    try {
-      if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        if (data.user) {
-          toast({
-            title: "Account Created!",
-            description: "Please check your email to verify your account",
-          });
-          onAuthSuccess();
-        }
-      } else {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        if (data.user) {
-          toast({
-            title: "Welcome back!",
-            description: "Successfully signed in",
-          });
-          onAuthSuccess();
-        }
-      }
-    } catch (error: any) {
-      toast({
-        title: "Authentication Error",
-        description: error.message || "An error occurred during authentication",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+  const handleEmailAuth = (isSignUp: boolean) => {
+    console.log(`${isSignUp ? 'Sign up' : 'Sign in'} with:`, { email, password });
+    // For now, mock authentication until Supabase is connected
+    if (email && password && (!isSignUp || password === confirmPassword)) {
+      onAuthSuccess();
     }
   };
 
-  const handleSocialAuth = async (provider: 'google' | 'apple') => {
-    setLoading(true);
-    
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      
-      if (error) throw error;
-    } catch (error: any) {
-      toast({
-        title: "Social Auth Error",
-        description: error.message || "An error occurred during social authentication",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleSocialAuth = (provider: string) => {
+    console.log(`${provider} authentication`);
+    // Mock social auth until Supabase is connected
+    onAuthSuccess();
   };
 
   return (
@@ -126,7 +58,6 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
@@ -137,15 +68,14 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
                 />
               </div>
               <Button 
                 onClick={() => handleEmailAuth(false)}
                 className="w-full gradient-primary text-white"
-                disabled={!email || !password || loading}
+                disabled={!email || !password}
               >
-                {loading ? 'Signing In...' : 'Sign In'}
+                Sign In
               </Button>
             </TabsContent>
             
@@ -158,7 +88,6 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
@@ -169,7 +98,6 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   placeholder="Create a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
@@ -180,15 +108,14 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  disabled={loading}
                 />
               </div>
               <Button 
                 onClick={() => handleEmailAuth(true)}
                 className="w-full gradient-primary text-white"
-                disabled={!email || !password || password !== confirmPassword || loading}
+                disabled={!email || !password || password !== confirmPassword}
               >
-                {loading ? 'Creating Account...' : 'Create Account'}
+                Create Account
               </Button>
             </TabsContent>
           </Tabs>
@@ -205,9 +132,8 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
           <div className="grid grid-cols-2 gap-2">
             <Button 
               variant="outline" 
-              onClick={() => handleSocialAuth('google')}
+              onClick={() => handleSocialAuth('Google')}
               className="text-sm flex items-center gap-2"
-              disabled={loading}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -219,9 +145,8 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => handleSocialAuth('apple')}
+              onClick={() => handleSocialAuth('Apple')}
               className="text-sm flex items-center gap-2"
-              disabled={loading}
             >
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
