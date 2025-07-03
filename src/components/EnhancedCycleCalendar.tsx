@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,8 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Bell, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CalendarDateSelector from './calendar/CalendarDateSelector';
 import CalendarGrid from './calendar/CalendarGrid';
+import CalendarYearView from './calendar/CalendarYearView';
 import CalendarDayDialog from './calendar/CalendarDayDialog';
 import CalendarLegend from './calendar/CalendarLegend';
 import AIChat from './calendar/AIChat';
@@ -23,11 +24,12 @@ const EnhancedCycleCalendar: React.FC<EnhancedCycleCalendarProps> = ({
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
-  const [viewMode, setViewMode] = useState<'calendar' | 'monthYear'>('calendar');
+  const [viewMode, setViewMode] = useState<'calendar' | 'monthYear' | 'year'>('calendar');
   const [showPeriodReminder, setShowPeriodReminder] = useState(!hasPeriodData);
   const [showAIChatDialog, setShowAIChatDialog] = useState(false);
   const [showMonthYearSelector, setShowMonthYearSelector] = useState(false);
   const [isCalendarAnimating, setIsCalendarAnimating] = useState(false);
+  const [calendarViewType, setCalendarViewType] = useState<'month' | 'year'>('month');
 
   const getDayPhase = (dayNumber: number) => {
     if (dayNumber >= 1 && dayNumber <= 5) return 'period';
@@ -133,6 +135,26 @@ const EnhancedCycleCalendar: React.FC<EnhancedCycleCalendarProps> = ({
     }, 150);
   };
 
+  const navigateYear = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      if (direction === 'prev') {
+        newDate.setFullYear(prev.getFullYear() - 1);
+      } else {
+        newDate.setFullYear(prev.getFullYear() + 1);
+      }
+      return newDate;
+    });
+  };
+
+  const handleMonthSelect = (month: number) => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(month);
+      return newDate;
+    });
+  };
+
   const handleMonthYearChange = (type: 'month' | 'year', value: string) => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
@@ -213,6 +235,18 @@ const EnhancedCycleCalendar: React.FC<EnhancedCycleCalendarProps> = ({
     );
   }
 
+  // Year View
+  if (viewMode === 'year') {
+    return (
+      <CalendarYearView
+        currentDate={currentDate}
+        onNavigateYear={navigateYear}
+        onMonthSelect={handleMonthSelect}
+        onBackToCalendar={() => setViewMode('calendar')}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6 relative animate-fade-in">
       {/* Responsive Close Button */}
@@ -227,6 +261,23 @@ const EnhancedCycleCalendar: React.FC<EnhancedCycleCalendarProps> = ({
           </Button>
         </div>
       )}
+
+      {/* Month/Year Toggle */}
+      <div className="flex justify-center mb-4">
+        <Tabs value={calendarViewType} onValueChange={(value: 'month' | 'year') => {
+          setCalendarViewType(value);
+          if (value === 'year') {
+            setViewMode('year');
+          } else {
+            setViewMode('calendar');
+          }
+        }} className="w-fit">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-2xl p-1">
+            <TabsTrigger value="month" className="rounded-xl">Month</TabsTrigger>
+            <TabsTrigger value="year" className="rounded-xl">Year</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
       {/* Responsive Month/Year Selector Dropdown */}
       {showMonthYearSelector && (
