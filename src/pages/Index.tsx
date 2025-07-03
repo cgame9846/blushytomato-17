@@ -31,6 +31,7 @@ const Index = () => {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [loadingType, setLoadingType] = useState<'period' | 'symptoms' | 'general'>('general');
   const [showCalendar, setShowCalendar] = useState(false);
+  const [hasPeriodData, setHasPeriodData] = useState(false);
   
   // Cycle data state to track period days, symptoms, sex activities, etc.
   const [cycleData, setCycleData] = useState<{[key: string]: {
@@ -91,7 +92,6 @@ const Index = () => {
   };
 
   const handleLogPeriod = () => {
-    // Redirect to track page instead of showing popup
     setActiveTab('track');
   };
 
@@ -100,7 +100,6 @@ const Index = () => {
     setLoadingMessage('Saving your beautiful symptoms and updating your cycle data...');
     setShowLoadingAnimation(true);
     
-    // Update cycle data
     const today = new Date();
     const dayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
     setCycleData(prev => ({
@@ -112,7 +111,6 @@ const Index = () => {
       }
     }));
     
-    // Simulate API call
     setTimeout(() => {
       setShowLoadingAnimation(false);
       console.log('Saved tracking data:', data);
@@ -135,7 +133,10 @@ const Index = () => {
       }
     }));
     
-    // Simulate API call
+    if (action === 'started') {
+      setHasPeriodData(true);
+    }
+    
     setTimeout(() => {
       setShowLoadingAnimation(false);
       console.log(`Period ${action} for ${selectedDate}`);
@@ -242,93 +243,83 @@ const Index = () => {
       case 'home':
         return (
           <div className="space-y-0 animate-fade-in">
-            {/* FLO-style Calendar Header with dynamic background */}
-            <div className={`bg-gradient-to-b ${getDayBackground(getCurrentPhase().name)} rounded-b-3xl px-4 pt-8 pb-6 mb-6 animate-slide-up`}>
+            {/* Responsive Calendar Header */}
+            <div className={`bg-gradient-to-b ${getDayBackground(getCurrentPhase().name)} rounded-b-3xl px-4 sm:px-6 pt-8 pb-6 mb-6 animate-slide-up`}>
               <div className="flex items-center justify-between mb-4">
-                {/* User Settings on the left */}
                 <UserSettings 
                   onAIPermissionChange={setAiPermissionEnabled}
                   aiPermissionEnabled={aiPermissionEnabled}
                 />
                 
-                {/* Centered Month Navigation */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <Button 
                     variant="ghost"
                     size="sm"
                     onClick={() => changeMonth('prev')}
-                    className="text-gray-700 hover:bg-white/20 hover-lift"
+                    className="text-gray-700 hover:bg-white/20 hover-lift h-8 w-8 sm:h-10 sm:w-10"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  <span className="text-gray-700 font-medium text-lg min-w-[120px] text-center">
+                  <span className="text-gray-700 font-medium text-sm sm:text-lg min-w-[100px] sm:min-w-[120px] text-center">
                     {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
                   </span>
                   <Button 
                     variant="ghost"
                     size="sm"
                     onClick={() => changeMonth('next')}
-                    className="text-gray-700 hover:bg-white/20 hover-lift"
+                    className="text-gray-700 hover:bg-white/20 hover-lift h-8 w-8 sm:h-10 sm:w-10"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
                 </div>
                 
-                {/* Calendar icon on the right */}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowCalendar(true)}
-                  className="text-gray-700 hover:bg-white/20 hover-lift w-8 h-8 p-0 rounded-full"
+                  className="text-gray-700 hover:bg-white/20 hover-lift w-8 h-8 sm:w-10 sm:h-10 p-0 rounded-full"
                 >
-                  <CalendarIcon className="h-4 w-4" />
+                  <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
 
-              {/* Calendar Week View - Now properly synced with colors and symbols */}
-              <div className="flex justify-between items-center mb-6">
+              {/* Responsive Calendar Week View */}
+              <div className="flex justify-between items-center mb-6 gap-1 sm:gap-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
                   const calendarDays = generateCalendarDaysForCurrentMonth();
                   const dayData = calendarDays[index];
-                  const isSelected = dayData?.isSelected;
-                  const isCurrentMonth = dayData?.isCurrentMonth;
-                  const phase = dayData?.phase;
-                  const isToday = dayData?.isToday;
                   return (
-                    <div key={index} className="text-center relative">
+                    <div key={index} className="text-center relative flex-1">
                       <div className="text-xs text-gray-600 mb-2">{day}</div>
                       <button
                         onClick={() => handleDateClick(dayData?.number || 1)}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 hover-lift relative ${
-                          isToday 
+                        className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-all duration-200 hover-lift relative mx-auto ${
+                          dayData?.isToday 
                             ? 'bg-white text-teal-600 shadow-lg ring-2 ring-teal-400 ring-offset-2 animate-pulse-soft' 
-                            : isSelected 
+                            : dayData?.isSelected 
                             ? 'bg-white text-teal-600 shadow-sm animate-bounce-gentle' 
-                            : isCurrentMonth
-                            ? `${getDayColor(dayData?.number || 1, phase || 'normal')} hover:bg-white/50`
+                            : dayData?.isCurrentMonth
+                            ? `${getDayColor(dayData?.number || 1, getDayPhase(dayData?.number || 1))} hover:bg-white/50`
                             : 'text-gray-400 hover:bg-white/30'
                         }`}
                       >
                         {dayData?.number || 1}
                         
-                        {/* High pregnancy chance indicator - specialized circle */}
-                        {dayData?.isHighPregnancy && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 border-2 border-green-500 rounded-full bg-transparent animate-pulse">
+                        {dayData?.isHighPregnancyChance && (
+                          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 sm:w-3 sm:h-3 border-2 border-green-500 rounded-full bg-transparent animate-pulse">
                             <div className="absolute inset-0.5 bg-green-500 rounded-full opacity-60"></div>
                           </div>
                         )}
                         
-                        {/* Ovulation indicator - specialized circle */}
                         {dayData?.isOvulation && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 border-2 border-blue-500 rounded-full bg-transparent animate-pulse">
+                          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 sm:w-3 sm:h-3 border-2 border-blue-500 rounded-full bg-transparent animate-pulse">
                             <div className="absolute inset-0.5 bg-blue-500 rounded-full opacity-60"></div>
                           </div>
                         )}
                         
-                        {/* Sex activity indicator - heart symbol */}
                         {dayData?.hasSex && (
-                          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
-                            <Heart className="w-2 h-2 text-pink-500 fill-pink-500" />
+                          <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2">
+                            <Heart className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-pink-500 fill-pink-500" />
                           </div>
                         )}
                       </button>
@@ -337,89 +328,82 @@ const Index = () => {
                 })}
               </div>
 
-              {/* Prediction Section */}
+              {/* Responsive Prediction Section */}
               <div className="text-center animate-scale-in">
-                <p className="text-gray-700 text-sm font-medium mb-2">Prediction:</p>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4 animate-fade-in">{currentPhase.dayLabel}</h2>
-                <Button 
-                  onClick={handleLogPeriod}
-                  className="bg-white text-teal-600 hover:bg-gray-50 rounded-full px-6 py-2 font-medium shadow-sm hover-lift animate-glow"
-                >
-                  Log period
-                </Button>
+                {!hasPeriodData ? (
+                  <>
+                    <p className="text-gray-700 text-xs sm:text-sm font-medium mb-2">Prediction:</p>
+                    <h2 className="text-lg sm:text-2xl font-bold text-gray-800 mb-4 animate-fade-in">{currentPhase.dayLabel}</h2>
+                    <Button 
+                      onClick={handleLogPeriod}
+                      className="bg-white text-teal-600 hover:bg-gray-50 rounded-full px-4 sm:px-6 py-2 font-medium shadow-sm hover-lift animate-glow text-sm sm:text-base"
+                    >
+                      Log period
+                    </Button>
+                  </>
+                ) : (
+                  <div className="bg-white/80 rounded-2xl p-4 backdrop-blur-sm">
+                    <p className="text-gray-700 text-sm font-medium mb-2">Period logged! 🩸</p>
+                    <p className="text-gray-600 text-xs">Your cycle data is being tracked</p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Daily Insights Section */}
-            <div className="px-4">
+            {/* Responsive Daily Insights */}
+            <div className="px-4 sm:px-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-800 animate-fade-in">My daily insights • Today</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-800 animate-fade-in">My daily insights • Today</h3>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                {/* Log Symptoms Card */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6">
                 <Card 
                   className="bg-gradient-to-br from-purple-100 to-pink-100 border-0 rounded-2xl cursor-pointer card-hover animate-slide-up"
-                  style={{ animationDelay: '0.1s' }}
                   onClick={() => setActiveTab('track')}
                 >
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl mb-2 animate-float">📝</div>
-                    <p className="text-sm font-medium text-gray-800 mb-1">Log your</p>
-                    <p className="text-sm font-medium text-gray-800">symptoms</p>
-                    <div className="mt-3">
-                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mx-auto animate-pulse-soft">
-                        <Plus className="h-4 w-4 text-purple-600" />
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl mb-2 animate-float">📝</div>
+                    <p className="text-xs sm:text-sm font-medium text-gray-800 mb-1">Log your</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-800">symptoms</p>
+                    <div className="mt-2 sm:mt-3">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center mx-auto animate-pulse-soft">
+                        <Plus className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Discharge Card */}
                 <Card 
                   className="bg-gradient-to-br from-purple-400 to-pink-500 border-0 rounded-2xl text-white cursor-pointer card-hover animate-slide-up"
-                  style={{ animationDelay: '0.2s' }}
+                  style={{ animationDelay: '0.1s' }}
                 >
-                  <CardContent className="p-4 text-center">
-                    <div className="text-2xl mb-2 animate-float">💜</div>
-                    <p className="text-sm font-medium mb-1">Discharge</p>
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <div className="text-xl sm:text-2xl mb-2 animate-float">💜</div>
+                    <p className="text-xs sm:text-sm font-medium mb-1">Discharge</p>
                     <p className="text-xs opacity-90 mb-2">See frequency for pregnancy</p>
-                    <div className="text-lg font-bold">Egg white</div>
+                    <div className="text-sm sm:text-lg font-bold">Egg white</div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Ovulation Signals */}
-              <Card className="bg-white border-0 rounded-2xl shadow-sm mb-6 card-hover animate-slide-up" style={{ animationDelay: '0.3s' }}>
-                <CardContent className="p-6">
-                  <h4 className="text-lg font-bold text-gray-800 mb-4 animate-fade-in">Spot the signals of ovulation</h4>
-                  <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover-lift">
-                    <Search className="h-5 w-5 text-gray-400 animate-pulse-soft" />
-                    <span className="text-gray-500 text-sm">Search articles, videos and more</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions Grid - Only AI Chat and Premium */}
+              {/* Responsive Quick Actions */}
               <div className="grid grid-cols-2 gap-3 mb-6">
                 <Card 
                   className="bg-white border-0 rounded-2xl shadow-sm card-hover cursor-pointer animate-slide-up"
-                  style={{ animationDelay: '0.4s' }}
                   onClick={() => setActiveTab('chat')}
                 >
-                  <CardContent className="p-4 text-center">
-                    <MessageCircle className="h-6 w-6 text-blue-500 mx-auto mb-2 animate-bounce-gentle" />
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 mx-auto mb-2 animate-bounce-gentle" />
                     <p className="text-xs font-medium text-gray-700">AI Chat</p>
                   </CardContent>
                 </Card>
 
                 <Card 
                   className="bg-white border-0 rounded-2xl shadow-sm card-hover cursor-pointer animate-slide-up"
-                  style={{ animationDelay: '0.5s' }}
                   onClick={() => setActiveTab('premium')}
                 >
-                  <CardContent className="p-4 text-center">
-                    <Sparkles className="h-6 w-6 text-purple-500 mx-auto mb-2 animate-bounce-gentle" />
+                  <CardContent className="p-3 sm:p-4 text-center">
+                    <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500 mx-auto mb-2 animate-bounce-gentle" />
                     <p className="text-xs font-medium text-gray-700">Premium</p>
                   </CardContent>
                 </Card>
@@ -506,16 +490,16 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 relative">
       <div className="relative max-w-md mx-auto bg-white min-h-screen">
-        <div className="pb-24">
+        <div className="pb-20 sm:pb-24">
           {renderContent()}
         </div>
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
 
-      {/* Calendar Modal - Full Calendar View */}
+      {/* Enhanced Calendar Modal */}
       {showCalendar && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="h-full overflow-y-auto p-4">
+          <div className="h-full overflow-y-auto p-2 sm:p-4">
             <div className="max-w-md mx-auto">
               <EnhancedCycleCalendar 
                 showAIChat={aiPermissionEnabled}
@@ -523,6 +507,7 @@ const Index = () => {
                 onClose={() => setShowCalendar(false)}
                 cycleData={cycleData}
                 onCycleDataUpdate={setCycleData}
+                hasPeriodData={hasPeriodData}
               />
             </div>
           </div>

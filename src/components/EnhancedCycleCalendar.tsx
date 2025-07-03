@@ -37,6 +37,7 @@ interface EnhancedCycleCalendarProps {
   onClose?: () => void;
   cycleData?: {[key: string]: any};
   onCycleDataUpdate?: (data: {[key: string]: any}) => void;
+  hasPeriodData?: boolean;
 }
 
 const EnhancedCycleCalendar: React.FC<EnhancedCycleCalendarProps> = ({ 
@@ -44,12 +45,13 @@ const EnhancedCycleCalendar: React.FC<EnhancedCycleCalendarProps> = ({
   aiPermissionEnabled = false,
   onClose,
   cycleData = {},
-  onCycleDataUpdate = () => {}
+  onCycleDataUpdate = () => {},
+  hasPeriodData = false
 }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<CalendarDay | null>(null);
   const [viewMode, setViewMode] = useState<'calendar' | 'monthYear'>('calendar');
-  const [showPeriodReminder, setShowPeriodReminder] = useState(true);
+  const [showPeriodReminder, setShowPeriodReminder] = useState(!hasPeriodData);
   const [showAIChatDialog, setShowAIChatDialog] = useState(false);
   const [showMonthYearSelector, setShowMonthYearSelector] = useState(false);
   const [chatMessages, setChatMessages] = useState<Message[]>([
@@ -169,7 +171,6 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
   };
 
   const getDayPhase = (dayNumber: number) => {
-    // Mock cycle data based on day of month
     if (dayNumber >= 1 && dayNumber <= 5) return 'period';
     if (dayNumber >= 10 && dayNumber <= 16) return 'fertile';
     if (dayNumber === 14) return 'ovulation';
@@ -328,7 +329,7 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
   };
 
   const getDayClassName = (day: CalendarDay) => {
-    let className = "w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 cursor-pointer relative mx-auto hover:scale-105 ";
+    let className = "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 cursor-pointer relative mx-auto hover:scale-105 ";
     
     if (!day.isCurrentMonth) {
       className += "text-gray-300 opacity-40 hover:opacity-60 ";
@@ -341,7 +342,6 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
       className += "ring-2 ring-rose-400 ring-offset-1 font-bold animate-pulse-soft ";
     }
     
-    // Only period days get red background
     if (day.isPeriod) {
       className += "bg-red-500 text-white shadow-md ";
     } else {
@@ -436,33 +436,33 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
   }
 
   return (
-    <div className="space-y-6 relative animate-fade-in">
-      {/* Close button for modal */}
+    <div className="space-y-4 sm:space-y-6 relative animate-fade-in">
+      {/* Responsive Close Button */}
       {onClose && (
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="ghost"
             onClick={onClose}
-            className="text-gray-600 hover:text-rose-600"
+            className="text-gray-600 hover:text-rose-600 text-sm sm:text-base"
           >
             ← Back to Home
           </Button>
         </div>
       )}
 
-      {/* Month/Year Toggle Button */}
-      <div className="text-center mb-6">
+      {/* Responsive Month/Year Toggle */}
+      <div className="text-center mb-4 sm:mb-6">
         <Button
           variant="outline"
           onClick={() => setShowMonthYearSelector(!showMonthYearSelector)}
-          className="text-lg font-bold text-gray-800 hover:text-rose-600 transition-colors border-gray-200 hover:border-rose-300 px-6 py-3 rounded-2xl"
+          className="text-base sm:text-lg font-bold text-gray-800 hover:text-rose-600 transition-colors border-gray-200 hover:border-rose-300 px-4 sm:px-6 py-2 sm:py-3 rounded-2xl"
         >
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           <ChevronDown className="h-4 w-4 ml-2" />
         </Button>
       </div>
 
-      {/* Month/Year Selector Dropdown */}
+      {/* Responsive Month/Year Selector Dropdown */}
       {showMonthYearSelector && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setShowMonthYearSelector(false)}>
           <div className="flex items-center justify-center min-h-screen p-4">
@@ -526,14 +526,14 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
         </div>
       )}
 
-      {/* AI Chat Toggle Button - Only show if permission enabled */}
+      {/* AI Chat Toggle - Responsive positioning */}
       {aiPermissionEnabled && (
         <div className="fixed top-4 right-4 z-50">
           <Button
             onClick={() => setShowAIChatDialog(!showAIChatDialog)}
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white shadow-2xl hover:scale-110 transition-all duration-300 animate-float"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white shadow-2xl hover:scale-110 transition-all duration-300 animate-float"
           >
-            <MessageCircle className="h-6 w-6" />
+            <MessageCircle className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
         </div>
       )}
@@ -614,35 +614,35 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
         </div>
       )}
 
-      {/* Enhanced Period Reminder */}
-      {showPeriodReminder && (
+      {/* Enhanced Period Reminder - Show only if no period data */}
+      {showPeriodReminder && !hasPeriodData && (
         <Card className="bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 border-0 shadow-xl rounded-3xl animate-slide-up">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-white rounded-full shadow-lg animate-pulse-soft">
-                  <Bell className="h-5 w-5 text-rose-500" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="p-3 sm:p-4 bg-white rounded-full shadow-lg animate-pulse-soft">
+                  <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-rose-500" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-gray-800">Period starts in 5 days</p>
-                  <p className="text-sm text-gray-600">Low chance of pregnancy</p>
+                  <p className="text-base sm:text-lg font-bold text-gray-800">Period starts in 5 days</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Low chance of pregnancy</p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <Button 
                   size="sm" 
                   onClick={handleLogPeriod}
-                  className="h-12 text-sm bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white rounded-full px-6 shadow-lg transition-all duration-300 hover:scale-105"
+                  className="h-10 sm:h-12 text-xs sm:text-sm bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white rounded-full px-4 sm:px-6 shadow-lg transition-all duration-300 hover:scale-105"
                 >
                   Log Period
                 </Button>
                 <Button 
                   size="sm" 
                   variant="ghost" 
-                  className="h-12 w-12 p-0 rounded-full hover:bg-white/80 transition-all duration-300"
+                  className="h-10 w-10 sm:h-12 sm:w-12 p-0 rounded-full hover:bg-white/80 transition-all duration-300"
                   onClick={() => setShowPeriodReminder(false)}
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
             </div>
@@ -650,20 +650,20 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
         </Card>
       )}
 
-      {/* Enhanced Calendar */}
+      {/* Enhanced Responsive Calendar */}
       <Card className="w-full max-w-md mx-auto shadow-2xl border-0 bg-white rounded-3xl overflow-hidden">
-        <CardHeader className="pb-6 bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
+        <CardHeader className="pb-4 sm:pb-6 bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigateMonth('prev')}
-              className="h-14 w-14 p-0 rounded-full hover:bg-white/80 transition-all duration-300 hover:shadow-lg hover:scale-105"
+              className="h-10 w-10 sm:h-14 sm:w-14 p-0 rounded-full hover:bg-white/80 transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
-              <ChevronLeft className="h-6 w-6 text-gray-600" />
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
             </Button>
             
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+            <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
               Calendar View
             </CardTitle>
             
@@ -671,25 +671,25 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
               variant="ghost"
               size="sm"
               onClick={() => navigateMonth('next')}
-              className="h-14 w-14 p-0 rounded-full hover:bg-white/80 transition-all duration-300 hover:shadow-lg hover:scale-105"
+              className="h-10 w-10 sm:h-14 sm:w-14 p-0 rounded-full hover:bg-white/80 transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
-              <ChevronRight className="h-6 w-6 text-gray-600" />
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" />
             </Button>
           </div>
         </CardHeader>
         
-        <CardContent className="px-8 pb-10">
-          {/* Day Headers */}
-          <div className="grid grid-cols-7 gap-2 mb-6">
+        <CardContent className="px-4 sm:px-8 pb-8 sm:pb-10">
+          {/* Responsive Day Headers */}
+          <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-4 sm:mb-6">
             {dayNames.map(day => (
-              <div key={day} className="text-center text-sm font-bold text-gray-400 py-4">
+              <div key={day} className="text-center text-xs sm:text-sm font-bold text-gray-400 py-2 sm:py-4">
                 {day}
               </div>
             ))}
           </div>
           
-          {/* Calendar Grid - NO dotted circles */}
-          <div className={`grid grid-cols-7 gap-3 mb-8 transition-all duration-300 ${isCalendarAnimating ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+          {/* Responsive Calendar Grid */}
+          <div className={`grid grid-cols-7 gap-2 sm:gap-3 mb-6 sm:mb-8 transition-all duration-300 ${isCalendarAnimating ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
             {calendarDays.map((day, index) => (
               <Dialog key={index}>
                 <DialogTrigger asChild>
@@ -698,51 +698,50 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
                     onClick={() => handleDayClick(day)}
                     style={{animationDelay: `${index * 0.01}s`}}
                   >
-                    <span>{day.date}</span>
-                    {/* Sex activity indicator - heart symbol */}
+                    <span className="text-xs sm:text-sm">{day.date}</span>
                     {day.hasSex && (
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
+                      <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2">
                         <Heart className="w-2 h-2 text-pink-500 fill-pink-500" />
                       </div>
                     )}
                   </div>
                 </DialogTrigger>
                 
-                <DialogContent className="sm:max-w-md rounded-3xl border-0 shadow-2xl animate-scale-in">
-                  <DialogHeader className="pb-8">
-                    <DialogTitle className="flex items-center gap-4 text-2xl">
-                      <div className="p-4 bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 rounded-full">
-                        <CalendarIcon className="h-8 w-8 text-rose-600" />
+                <DialogContent className="w-[95vw] max-w-md rounded-3xl border-0 shadow-2xl animate-scale-in">
+                  <DialogHeader className="pb-6 sm:pb-8">
+                    <DialogTitle className="flex items-center gap-3 sm:gap-4 text-lg sm:text-2xl">
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 rounded-full">
+                        <CalendarIcon className="h-6 w-6 sm:h-8 sm:w-8 text-rose-600" />
                       </div>
                       <div>
-                        <div className="text-xl font-bold text-gray-800">
+                        <div className="text-lg sm:text-xl font-bold text-gray-800">
                           {monthNames[currentDate.getMonth()]} {day.date}
                         </div>
-                        <div className="text-sm text-gray-500 font-normal">
+                        <div className="text-xs sm:text-sm text-gray-500 font-normal">
                           How are you feeling?
                         </div>
                       </div>
                     </DialogTitle>
                   </DialogHeader>
                   
-                  <div className="space-y-8">
-                    <div className="space-y-4">
-                      <Label className="text-lg font-bold text-gray-700 flex items-center gap-2">
-                        <Droplet className="h-5 w-5 text-rose-500" />
+                  <div className="space-y-6 sm:space-y-8">
+                    <div className="space-y-3 sm:space-y-4">
+                      <Label className="text-base sm:text-lg font-bold text-gray-700 flex items-center gap-2">
+                        <Droplet className="h-4 w-4 sm:h-5 sm:w-5 text-rose-500" />
                         Period Status
                       </Label>
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-2 sm:gap-3">
                         <Button
                           variant={day.isPeriod ? "default" : "outline"}
                           size="sm"
                           onClick={() => saveDayData({ isPeriod: !day.isPeriod })}
-                          className={`rounded-full transition-all duration-300 ${day.isPeriod ? 'bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white shadow-lg' : 'hover:shadow-md'}`}
+                          className={`rounded-full transition-all duration-300 text-xs sm:text-sm ${day.isPeriod ? 'bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white shadow-lg' : 'hover:shadow-md'}`}
                         >
-                          <Droplet className="h-4 w-4 mr-2" />
+                          <Droplet className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                           Period Day
                         </Button>
                         {day.isPeriod && (
-                          <div className="flex gap-2 animate-slide-up">
+                          <div className="flex gap-1 sm:gap-2 animate-slide-up">
                             {['light', 'medium', 'heavy'].map(flow => (
                               <Button
                                 key={flow}
@@ -761,18 +760,18 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
                       </div>
                     </div>
                     
-                    <div className="space-y-4">
-                      <Label className="text-lg font-bold text-gray-700 flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-rose-500" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <Label className="text-base sm:text-lg font-bold text-gray-700 flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-rose-500" />
                         Symptoms
                       </Label>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3">
                         {symptoms.map(symptom => (
                           <Button
                             key={symptom}
                             variant={day.symptoms?.includes(symptom) ? "default" : "outline"}
                             size="sm"
-                            className={`text-sm h-auto py-4 rounded-2xl transition-all duration-300 ${
+                            className={`text-xs sm:text-sm h-auto py-3 sm:py-4 rounded-2xl transition-all duration-300 ${
                               day.symptoms?.includes(symptom) ? 'bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white shadow-lg' : 'hover:shadow-md hover:scale-105'
                             }`}
                             onClick={() => {
@@ -789,9 +788,9 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
                       </div>
                     </div>
                     
-                    <div className="space-y-4">
-                      <Label htmlFor="notes" className="text-lg font-bold text-gray-700 flex items-center gap-2">
-                        <Heart className="h-5 w-5 text-rose-500" />
+                    <div className="space-y-3 sm:space-y-4">
+                      <Label htmlFor="notes" className="text-base sm:text-lg font-bold text-gray-700 flex items-center gap-2">
+                        <Heart className="h-4 w-4 sm:h-5 sm:w-5 text-rose-500" />
                         Daily Notes
                       </Label>
                       <Textarea
@@ -799,7 +798,7 @@ Please respond with warmth, empathy, and helpful advice in a caring, friendly to
                         placeholder="How are you feeling today? Any thoughts or reflections..."
                         value={day.notes || ''}
                         onChange={(e) => saveDayData({ notes: e.target.value })}
-                        className="text-sm rounded-2xl border-2 border-gray-100 resize-none focus:border-rose-300 transition-all duration-300 p-4"
+                        className="text-xs sm:text-sm rounded-2xl border-2 border-gray-100 resize-none focus:border-rose-300 transition-all duration-300 p-3 sm:p-4"
                         rows={4}
                       />
                     </div>
