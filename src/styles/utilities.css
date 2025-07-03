@@ -1,0 +1,100 @@
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .gradient-calendar {
+    background: var(--gradient-calendar);
+  }
+  
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Enhanced Responsive Hover Effects */
+.hover-lift {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 640px) {
+  .hover-lift:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
+}
+
+/* Responsive Card Hover Effects */
+.card-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 640px) {
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Focus states */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Responsive utility classes */
+@media (max-width: 640px) {
+  .text-responsive {
+    @apply text-sm;
+  }
+  
+  .padding-responsive {
+    @apply p-3;
+  }
+  
+  .gap-responsive {
+    @apply gap-2;
+  }
+}
+
+@media (min-width: 640px) {
+  .text-responsive {
+    @apply text-base;
+  }
+  
+  .padding-responsive {
+    @apply p-4;
+  }
+  
+  .gap-responsive {
+    @apply gap-4;
+  }
+}
